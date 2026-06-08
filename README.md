@@ -57,56 +57,25 @@ VH range:
 
 [-32, -5]
 
-Normalization:
-
-X
-norm
-	​
-
-=
-X
-max
-	​
-
-−X
-min
-	​
-
-X−X
-min
-	​
-
-	​
-
 Physics-Based SAR Features
 
 To improve flood discrimination, additional SAR descriptors are generated:
 
 Polarization Ratio
-PR=
-VV
-VH
-	​
+PR=VH/VV
 
 Polarization Difference
 Difference=VV−VH
+
 Joint Scattering Feature
 Joint=VV×VH
+
 Radar Vegetation Index (RVI)
-RVI=
-VV+VH
-4VH
+RVI=4VH/VV+VH
+
+NDSI= VV-VH/VV+VH
 	​
-
-NDSI
-NDSI=
-VV+VH
-VV−VH
-	​
-
-
 Final feature representation:
-
 VV
 VH
 Polarization Ratio
@@ -114,123 +83,51 @@ Polarization Difference
 Joint Scattering
 RVI
 NDSI
+
 Model Architectures
 1. ResNet34 U-Net Baseline
-
 Input:
-
 512 × 512 × 2
-
 Channels:
-
 VV
 VH
-
 Features:
-
 ResNet34 encoder
 U-Net decoder
 Skip connections
 Dropout regularization
-2. Physics-Based ResNet34 U-Net
 
+3. Physics-Based ResNet34 U-Net
 Input:
-
 512 × 512 × 5
-
 Additional channels:
-
 Polarization Ratio
 RVI
 NDSI
-
 Uses transfer learning from baseline model.
 
 3. CPFG-Net
-
 Proposed architecture containing:
-
 Dual ResNet34 encoders
 Cross Polarization Feature Gating
 Multi-scale feature fusion
 Physics feature injection
 U-Net decoder
 Cross Polarization Feature Gating
-
 Instead of directly merging VV and VH channels, CPFG-Net learns polarization-specific interactions.
 
 Dual Encoders
-F
-VV
-	​
+Fvv = Encodervv(Xvv)
+Fvh = Encoder(Xvh)
 
-=Encoder
-VV
-	​
-
-(X
-VV
-	​
-
-)
-F
-VH
-	​
-
-=Encoder
-VH
-	​
-
-(X
-VH
-	​
-
-)
 Adaptive Gating
-A
-VV
-	​
+Avv=σ(Conv(Fvh))
+Avh=σ(Conv(Fvv))
 
-=σ(Conv(F
-VH
-	​
-
-))
-A
-VH
-	​
-
-=σ(Conv(F
-VV
-	​
-
-))
 Gated Features
-G
-VV
+Gvv	=Fvv⊙Avv
+Gvh=Fvh⊙Avh
 	​
-
-=F
-VV
-	​
-
-⊙A
-VV
-	​
-
-G
-VH
-	​
-
-=F
-VH
-	​
-
-⊙A
-VH
-	​
-
-
 This allows the network to learn meaningful cross-polarization relationships.
 
 Handling Class Imbalance
